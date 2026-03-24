@@ -1,5 +1,7 @@
 /**
- * Google Assistant Sound Library (OGG) + SoundHelix MP3 fallbacks.
+ * Ambient tracks: primary = MP3 (iOS Safari + all major browsers).
+ * Wikimedia Commons transcoded MP3s (see file pages for licenses).
+ * Fallback = Google Assistant Sound Library OGG (desktop; iOS often cannot decode OGG).
  */
 
 export type AmbientId = "oceanWaves" | "whiteNoise1" | "whiteNoise2";
@@ -9,19 +11,29 @@ export type AmbientTrackMeta = {
   label: string;
 };
 
+/**
+ * MP3 — works on mobile Safari. Sources:
+ * - Waves: https://commons.wikimedia.org/wiki/File:Waves.ogg (public domain)
+ * - Garden rain: https://commons.wikimedia.org/wiki/File:Garden_rainfall.ogg (Free Art License)
+ * - Howling wind: https://commons.wikimedia.org/wiki/File:Howling_wind.ogg (CC0)
+ */
 export const AMBIENT_TRACK_URL: Record<AmbientId, string> = {
+  oceanWaves:
+    "https://upload.wikimedia.org/wikipedia/commons/transcoded/1/1f/Waves.ogg/Waves.ogg.mp3",
+  whiteNoise1:
+    "https://upload.wikimedia.org/wikipedia/commons/transcoded/5/55/Garden_rainfall.ogg/Garden_rainfall.ogg.mp3",
+  whiteNoise2:
+    "https://upload.wikimedia.org/wikipedia/commons/transcoded/2/2d/Howling_wind.ogg/Howling_wind.ogg.mp3",
+};
+
+/** OGG fallback when primary MP3 fails and the browser supports Vorbis. */
+export const AMBIENT_TRACK_URL_FALLBACK: Record<AmbientId, string> = {
   oceanWaves:
     "https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg",
   whiteNoise1:
     "https://actions.google.com/sounds/v1/weather/light_rain.ogg",
   whiteNoise2:
     "https://actions.google.com/sounds/v1/weather/strong_wind.ogg",
-};
-
-export const AMBIENT_TRACK_URL_FALLBACK: Record<AmbientId, string> = {
-  oceanWaves: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-  whiteNoise1: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-  whiteNoise2: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
 };
 
 export const AMBIENT_TRACK_GAIN: Record<AmbientId, number> = {

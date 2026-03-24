@@ -7,11 +7,10 @@ import {
   type AmbientId,
 } from "./ambient-tracks";
 
-function preferOgg(): boolean {
-  if (typeof document === "undefined") return true;
+function canPlayOggVorbis(): boolean {
+  if (typeof document === "undefined") return false;
   const a = document.createElement("audio");
-  const t = a.canPlayType('audio/ogg; codecs="vorbis"');
-  return t !== "";
+  return a.canPlayType('audio/ogg; codecs="vorbis"') !== "";
 }
 
 function mediaReady(el: HTMLAudioElement): boolean {
@@ -120,8 +119,9 @@ export class AmbientStreamEngine {
     }
   }
 
+  /** Always MP3 first so iOS Safari gets real ambient audio. */
   private initialSrcFor(id: AmbientId): string {
-    return preferOgg() ? AMBIENT_TRACK_URL[id] : AMBIENT_TRACK_URL_FALLBACK[id];
+    return AMBIENT_TRACK_URL[id];
   }
 
   private getOrCreate(id: AmbientId): HTMLAudioElement {
@@ -130,9 +130,8 @@ export class AmbientStreamEngine {
       el = new Audio();
       el.loop = true;
       el.preload = "auto";
-      const primary = this.initialSrcFor(id);
-      el.src = primary;
-      this.usingFallback.set(id, primary === AMBIENT_TRACK_URL_FALLBACK[id]);
+      el.src = this.initialSrcFor(id);
+      this.usingFallback.set(id, false);
       this.audios.set(id, el);
     }
     return el;
@@ -173,7 +172,7 @@ export class AmbientStreamEngine {
 
     if (
       result === "decode_fail" &&
-      preferOgg() &&
+      canPlayOggVorbis() &&
       !this.usingFallback.get(id)
     ) {
       this.switchToFallback(id, el);
