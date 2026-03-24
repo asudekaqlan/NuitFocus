@@ -1,0 +1,169 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { CloudRain, Waves, Wind, type LucideIcon } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import {
+  AMBIENT_DEFAULT_TRACK_LINEAR,
+  AMBIENT_TRACK_VOLUMES_STORAGE_KEY,
+  AMBIENT_TRACKS,
+  loadAmbientTrackVolumesFromStorage,
+  type AmbientId,
+} from "@/lib/ambient-tracks";
+import { getAmbientStreamEngine } from "@/lib/ambient-stream-engine";
+import {
+  AMBIENT_FRAME,
+  SANCTUARY_GLASS_FILL,
+} from "@/lib/sanctuary-styles";
+
+const ICONS: Record<AmbientId, LucideIcon> = {
+  oceanWaves: Waves,
+  whiteNoise1: CloudRain,
+  whiteNoise2: Wind,
+};
+
+export function AmbientSoundBar() {
+  const initialActive = (): Record<AmbientId, boolean> =>
+    Object.fromEntries(AMBIENT_TRACKS.map((t) => [t.id, false])) as Record<
+      AmbientId,
+      boolean
+    >;
+
+  const [active, setActive] = useState<Record<AmbientId, boolean>>(initialActive);
+  const [volumes, setVolumes] = useState<Record<AmbientId, number>>(() =>
+    Object.fromEntries(
+      AMBIENT_TRACKS.map((t) => [t.id, AMBIENT_DEFAULT_TRACK_LINEAR])
+    ) as Record<AmbientId, number>
+  );
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    getAmbientStreamEngine().syncTrackCatalog();
+    const loaded = loadAmbientTrackVolumesFromStorage();
+    setVolumes(loaded);
+    getAmbientStreamEngine().setAllTrackVolumes(loaded);
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    const engine = getAmbientStreamEngine();
+    engine.setAllTrackVolumes(volumes);
+    try {
+      window.localStorage.setItem(
+        AMBIENT_TRACK_VOLUMES_STORAGE_KEY,
+        JSON.stringify(volumes)
+      );
+    } catch {
+      /* ignore */
+    }
+  }, [volumes, hydrated]);
+
+  const setTrackVol = useCallback((id: AmbientId, linear: number) => {
+    setVolumes((prev) => ({ ...prev, [id]: linear }));
+  }, []);
+
+  const toggle = useCallback(async (id: AmbientId) => {
+    const engine = getAmbientStreamEngine();
+    if (engine.isPlaying(id)) {
+      engine.pause(id);
+      setActive((a) => ({ ...a, [id]: false }));
+      return;
+    }
+    const ok = await engine.play(id);
+    setActive((a) => ({ ...a, [id]: ok }));
+  }, []);
+
+  return (
+    <section
+      className="relative mx-auto mb-3 w-full max-w-4xl overflow-visible sm:mb-4"
+      aria-label="Sesler"
+    >
+      <div className="grid grid-cols-3 gap-2 pt-1 sm:flex sm:flex-nowrap sm:gap-2 sm:pt-2">
+        {AMBIENT_TRACKS.map(({ id, label }) => {
+          const Icon = ICONS[id];
+          const isOn = active[id];
+          const vol = volumes[id] ?? 0.45;
+          return (
+            <div
+              key={id}
+              className="group relative min-h-0 min-w-0 sm:flex-1"
+            >
+              <div
+                className="pointer-events-none absolute inset-x-0 bottom-full z-20 mb-0 flex h-6 items-center justify-center px-0.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
+              >
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={Math.round(vol * 100)}
+                  onChange={(e) =>
+                    setTrackVol(id, Number(e.target.value) / 100)
+                  }
+                  className="ambient-track-vol-slider h-1 w-full min-w-0 cursor-pointer appearance-none rounded-full bg-slate-600/35"
+                  aria-label={`${label} ses seviyesi`}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+
+              <motion.button
+                type="button"
+                layout
+                onClick={() => void toggle(id)}
+                title={label}
+                aria-pressed={isOn}
+                aria-label={`${label} — ${isOn ? "durdur" : "çal"}`}
+                whileTap={{ scale: 0.97 }}
+                transition={{
+                  type: "spring",
+                  stiffness: 520,
+                  damping: 28,
+                }}
+                className={`flex min-h-[3rem] w-full flex-col items-center justify-center gap-1 px-2 py-2.5 text-center transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40 sm:min-h-0 sm:flex-row sm:py-3 ${AMBIENT_FRAME} ${
+                  isOn
+                    ? "bg-gradient-to-b from-violet-950/45 via-slate-900/72 to-slate-950/88 backdrop-blur-xl shadow-[0_8px_28px_rgba(0,0,0,0.22),inset_0_1px_0_0_rgba(255,255,255,0.06),0_0_18px_-4px_rgba(148,163,184,0.35)] text-violet-50"
+                    : `${SANCTUARY_GLASS_FILL} text-white/65 hover:text-white/85`
+                }`}
+              >
+                <Icon
+                  size={22}
+                  className={isOn ? "text-violet-100" : "text-white/60"}
+                  strokeWidth={1.5}
+                  aria-hidden
+                />
+                <span className="max-w-full truncate font-sans text-[10px] font-medium uppercase tracking-wider opacity-90 sm:text-[11px]">
+                  {label}
+                </span>
+              </motion.button>
+            </div>
+          );
+        })}
+      </div>
+      <style jsx>{`
+        .ambient-track-vol-slider {
+          accent-color: rgb(196 181 253 / 0.85);
+        }
+        .ambient-track-vol-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          width: 12px;
+          height: 12px;
+          border-radius: 9999px;
+          background: rgb(30 41 59);
+          border: 1px solid rgb(196 181 253 / 0.55);
+          box-shadow: 0 0 0 2px rgb(15 23 42 / 0.6),
+            0 0 12px rgb(167 139 250 / 0.35);
+        }
+        .ambient-track-vol-slider::-moz-range-thumb {
+          width: 12px;
+          height: 12px;
+          border-radius: 9999px;
+          background: rgb(30 41 59);
+          border: 1px solid rgb(196 181 253 / 0.55);
+          box-shadow: 0 0 0 2px rgb(15 23 42 / 0.6),
+            0 0 12px rgb(167 139 250 / 0.35);
+        }
+      `}</style>
+    </section>
+  );
+}
