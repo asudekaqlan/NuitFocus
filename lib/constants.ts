@@ -48,52 +48,6 @@ export const SEED_PANELS: Panel[] = [
   },
 ];
 
-export type ColorPreset = {
-  id: string;
-  label: string;
-  border: string;
-  iconBg: string;
-};
-
-export const COLOR_PRESETS: ColorPreset[] = [
-  {
-    id: "softMint",
-    label: "Soft Mint",
-    border: "border-l-[#6ee7c5]",
-    iconBg: "bg-teal-400/20 text-teal-100",
-  },
-  {
-    id: "mutedRose",
-    label: "Muted Rose",
-    border: "border-l-[#f0abbd]",
-    iconBg: "bg-rose-400/20 text-rose-100",
-  },
-  {
-    id: "paleGold",
-    label: "Pale Gold",
-    border: "border-l-[#f5d88a]",
-    iconBg: "bg-amber-400/20 text-amber-100",
-  },
-  {
-    id: "softLavender",
-    label: "Soft Lavender",
-    border: "border-l-[#c4b5fd]",
-    iconBg: "bg-violet-400/20 text-violet-100",
-  },
-  {
-    id: "powderBlue",
-    label: "Powder Blue",
-    border: "border-l-[#93c5fd]",
-    iconBg: "bg-sky-400/20 text-sky-100",
-  },
-  {
-    id: "dustyPeach",
-    label: "Dusty Peach",
-    border: "border-l-[#fdba8c]",
-    iconBg: "bg-orange-400/20 text-orange-100",
-  },
-];
-
 export const MODAL_ICON_KEYS = [
   "Book",
   "Code",

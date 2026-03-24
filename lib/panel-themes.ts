@@ -1,4 +1,4 @@
-import { COLOR_PRESETS, type ColorPreset } from "./constants";
+import { NEW_PANEL_THEME_ID } from "./constants";
 
 export type PanelTheme = {
   iconBg: string;
@@ -37,14 +37,6 @@ const CORE_THEMES: Record<string, PanelTheme> = {
   },
 };
 
-function fallbackFromPreset(_p: ColorPreset): PanelTheme {
-  return {
-    iconBg: PANEL_ICON_SURFACE,
-    tint: "bg-gradient-to-br from-white/[0.06] to-transparent",
-    headerBar: HEADER_BAR,
-  };
-}
-
 const THEME_ALIASES: Record<string, string> = {
   twilightGold: "sageNight",
 };
@@ -53,7 +45,5 @@ export function getPanelTheme(colorId: string): PanelTheme {
   const id = THEME_ALIASES[colorId] ?? colorId;
   const core = CORE_THEMES[id];
   if (core) return core;
-  const preset =
-    COLOR_PRESETS.find((c) => c.id === id) ?? COLOR_PRESETS[0];
-  return fallbackFromPreset(preset);
+  return CORE_THEMES[NEW_PANEL_THEME_ID] ?? CORE_THEMES.deepNavy;
 }
