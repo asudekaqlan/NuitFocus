@@ -153,13 +153,22 @@ export class AmbientStreamEngine {
     this.applyVolume(id, el);
 
     const attemptPlay = async (): Promise<"ok" | "decode_fail" | "play_fail"> => {
+      // iOS Safari only unlocks audio if `play()` runs in the same user-activation
+      // turn as the tap. Awaiting `waitForCanPlay` first breaks that chain.
+      try {
+        await el.play();
+        if (!el.paused) return "ok";
+      } catch {
+        /* not enough buffered yet — fall through */
+      }
+
       const ready = await waitForCanPlay(el);
       if (!ready || el.error) {
         return "decode_fail";
       }
       try {
         await el.play();
-        return "ok";
+        return el.paused ? "play_fail" : "ok";
       } catch {
         return "play_fail";
       }

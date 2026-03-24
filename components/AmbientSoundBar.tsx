@@ -90,7 +90,7 @@ export function AmbientSoundBar() {
               className="group relative min-h-0 min-w-0 sm:flex-1"
             >
               <div
-                className="pointer-events-none absolute inset-x-0 bottom-full z-20 mb-0 flex h-6 items-center justify-center px-0.5 opacity-0 transition-opacity duration-150 group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100"
+                className="relative z-20 mb-1 flex h-7 items-center justify-center px-0.5 opacity-100 sm:absolute sm:inset-x-0 sm:bottom-full sm:mb-0 sm:h-6 sm:pointer-events-none sm:opacity-0 sm:transition-opacity sm:duration-150 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100 sm:group-focus-within:pointer-events-auto sm:group-focus-within:opacity-100"
               >
                 <input
                   type="range"
