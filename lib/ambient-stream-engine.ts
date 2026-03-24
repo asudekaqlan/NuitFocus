@@ -56,10 +56,18 @@ function waitForCanPlay(
       finish(mediaReady(el));
     }, timeoutMs);
 
-    try {
-      el.load();
-    } catch {
-      finish(false);
+    // Do not call `load()` here: it resets the element and aborts an in-flight
+    // fetch started by `play()`. That breaks mobile Safari where the first
+    // play() primes loading and the second play() must not restart from scratch.
+    if (
+      el.readyState === HTMLMediaElement.HAVE_NOTHING &&
+      el.networkState === HTMLMediaElement.NETWORK_EMPTY
+    ) {
+      try {
+        el.load();
+      } catch {
+        finish(false);
+      }
     }
   });
 }
@@ -130,9 +138,19 @@ export class AmbientStreamEngine {
       el = new Audio();
       el.loop = true;
       el.preload = "auto";
+      el.setAttribute("playsinline", "");
+      el.setAttribute("webkit-playsinline", "");
       el.src = this.initialSrcFor(id);
       this.usingFallback.set(id, false);
       this.audios.set(id, el);
+      if (typeof document !== "undefined") {
+        el.setAttribute("data-ambient-id", id);
+        el.setAttribute("aria-hidden", "true");
+        el.tabIndex = -1;
+        el.style.cssText =
+          "position:fixed;width:0;height:0;opacity:0;pointer-events:none;left:0;top:0";
+        document.body.appendChild(el);
+      }
     }
     return el;
   }
@@ -145,6 +163,20 @@ export class AmbientStreamEngine {
       el.load();
     } catch {
       /* ignore */
+    }
+  }
+
+  /**
+   * Must run synchronously inside pointer/click dispatch (no await before this)
+   * so iOS/Android keep media user activation for `HTMLMediaElement.play()`.
+   */
+  playFromUserGesture(id: AmbientId): void {
+    const el = this.getOrCreate(id);
+    this.applyVolume(id, el);
+    try {
+      void el.play();
+    } catch {
+      /* play() may throw before returning a promise */
     }
   }
 
@@ -212,6 +244,7 @@ export class AmbientStreamEngine {
         el.pause();
         el.removeAttribute("src");
         el.load();
+        el.remove();
         this.audios.delete(id);
         this.usingFallback.delete(id);
       }
@@ -223,6 +256,7 @@ export class AmbientStreamEngine {
       el.pause();
       el.removeAttribute("src");
       el.load();
+      el.remove();
     }
     this.audios.clear();
     this.usingFallback.clear();

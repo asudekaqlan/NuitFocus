@@ -70,6 +70,8 @@ export function AmbientSoundBar() {
       setActive((a) => ({ ...a, [id]: false }));
       return;
     }
+    // Same synchronous turn as the tap — required for strict mobile browsers.
+    engine.playFromUserGesture(id);
     const ok = await engine.play(id);
     setActive((a) => ({ ...a, [id]: ok }));
   }, []);
@@ -90,7 +92,7 @@ export function AmbientSoundBar() {
               className="group relative min-h-0 min-w-0 sm:flex-1"
             >
               <div
-                className="relative z-20 mb-1 flex h-7 items-center justify-center px-0.5 opacity-100 sm:absolute sm:inset-x-0 sm:bottom-full sm:mb-0 sm:h-6 sm:pointer-events-none sm:opacity-0 sm:transition-opacity sm:duration-150 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100 sm:group-focus-within:pointer-events-auto sm:group-focus-within:opacity-100"
+                className="relative z-10 mb-1 flex h-7 items-center justify-center px-0.5 opacity-100 sm:absolute sm:inset-x-0 sm:bottom-full sm:mb-0 sm:h-6 sm:pointer-events-none sm:opacity-0 sm:transition-opacity sm:duration-150 sm:group-hover:pointer-events-auto sm:group-hover:opacity-100 sm:group-focus-within:pointer-events-auto sm:group-focus-within:opacity-100"
               >
                 <input
                   type="range"
@@ -109,6 +111,7 @@ export function AmbientSoundBar() {
               <motion.button
                 type="button"
                 layout
+                style={{ touchAction: "manipulation" }}
                 onClick={() => void toggle(id)}
                 title={label}
                 aria-pressed={isOn}
@@ -119,7 +122,7 @@ export function AmbientSoundBar() {
                   stiffness: 520,
                   damping: 28,
                 }}
-                className={`flex min-h-[3rem] w-full flex-col items-center justify-center gap-1 px-2 py-2.5 text-center transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40 sm:min-h-0 sm:flex-row sm:py-3 ${AMBIENT_FRAME} ${
+                className={`relative z-20 flex min-h-[3rem] w-full touch-manipulation flex-col items-center justify-center gap-1 px-2 py-2.5 text-center transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400/40 sm:min-h-0 sm:flex-row sm:py-3 ${AMBIENT_FRAME} ${
                   isOn
                     ? "bg-gradient-to-b from-violet-950/45 via-slate-900/72 to-slate-950/88 backdrop-blur-xl shadow-[0_8px_28px_rgba(0,0,0,0.22),inset_0_1px_0_0_rgba(255,255,255,0.06),0_0_18px_-4px_rgba(148,163,184,0.35)] text-violet-50"
                     : `${SANCTUARY_GLASS_FILL} text-white/65 hover:text-white/85`
