@@ -90,7 +90,7 @@ export function AmbientSoundBar() {
 
   return (
     <section
-      className="relative mx-auto mb-3 w-full max-w-4xl overflow-visible sm:mb-4"
+      className="relative mx-auto mb-3 hidden w-full max-w-4xl overflow-visible sm:mb-4 sm:block"
       aria-label="Sesler"
     >
       <div className="grid grid-cols-3 gap-2 pt-1 sm:flex sm:flex-nowrap sm:gap-2 sm:pt-2">
