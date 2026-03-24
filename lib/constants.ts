@@ -2,6 +2,9 @@ import type { Panel } from "./types";
 
 export const STORAGE_KEY = "nuitfocus-panels-v1";
 
+/** Theme id for panels created via “Add New Panel” (matches `getPanelTheme` core themes). */
+export const NEW_PANEL_THEME_ID = "deepNavy";
+
 export const SEED_PANELS: Panel[] = [
   {
     id: "seed-deep-work",

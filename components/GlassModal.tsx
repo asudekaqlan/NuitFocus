@@ -2,33 +2,23 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import {
-  COLOR_PRESETS,
-  MODAL_ICON_KEYS,
-  type ModalIconKey,
-} from "@/lib/constants";
+import { MODAL_ICON_KEYS, type ModalIconKey } from "@/lib/constants";
 import { PanelIcon } from "@/lib/panel-icons";
 
 type GlassModalProps = {
   open: boolean;
   onClose: () => void;
-  onSubmit: (payload: {
-    title: string;
-    color: string;
-    icon: ModalIconKey;
-  }) => void;
+  onSubmit: (payload: { title: string; icon: ModalIconKey }) => void;
 };
 
 export function GlassModal({ open, onClose, onSubmit }: GlassModalProps) {
   const titleRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
-  const [colorId, setColorId] = useState(COLOR_PRESETS[0].id);
   const [iconKey, setIconKey] = useState<ModalIconKey>("Moon");
 
   useEffect(() => {
     if (open) {
       setTitle("");
-      setColorId(COLOR_PRESETS[0].id);
       setIconKey("Moon");
       setTimeout(() => titleRef.current?.focus(), 50);
     }
@@ -69,7 +59,7 @@ export function GlassModal({ open, onClose, onSubmit }: GlassModalProps) {
               Add New Panel
             </h2>
             <p className="mt-1 font-sans text-sm text-white/55">
-              Title, color, and icon for your focus zone.
+              Title and icon for your focus zone.
             </p>
 
             <label className="mt-5 block font-sans text-sm text-white/70">
@@ -83,28 +73,6 @@ export function GlassModal({ open, onClose, onSubmit }: GlassModalProps) {
                 placeholder="e.g. Morning sprint"
               />
             </label>
-
-            <p className="mb-2 font-sans text-sm text-white/70">Color</p>
-            <div className="mb-5 flex flex-wrap gap-3">
-              {COLOR_PRESETS.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => setColorId(c.id)}
-                  className={`h-9 w-9 rounded-full border-2 transition-all hover:shadow-[0_0_15px_rgba(230,230,250,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/60 ${
-                    colorId === c.id
-                      ? "border-white scale-110"
-                      : "border-slate-500/50"
-                  }`}
-                  style={{
-                    background: `linear-gradient(135deg, ${tintFromPreset(c.id)}, rgba(255,255,255,0.15))`,
-                  }}
-                  title={c.label}
-                  aria-label={c.label}
-                  aria-pressed={colorId === c.id}
-                />
-              ))}
-            </div>
 
             <p className="mb-2 font-sans text-sm text-white/70">Icon</p>
             <div className="mb-6 grid grid-cols-4 gap-2">
@@ -139,7 +107,7 @@ export function GlassModal({ open, onClose, onSubmit }: GlassModalProps) {
                 onClick={() => {
                   const t = title.trim();
                   if (!t) return;
-                  onSubmit({ title: t, color: colorId, icon: iconKey });
+                  onSubmit({ title: t, icon: iconKey });
                   onClose();
                 }}
                 className="rounded-lg border border-slate-500/35 bg-slate-800/60 px-4 py-2 font-sans text-sm font-medium text-white transition-colors hover:bg-slate-700/65 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-300/50 active:scale-[0.98]"
@@ -152,16 +120,4 @@ export function GlassModal({ open, onClose, onSubmit }: GlassModalProps) {
       )}
     </AnimatePresence>
   );
-}
-
-function tintFromPreset(id: string): string {
-  const map: Record<string, string> = {
-    softMint: "#34d399",
-    mutedRose: "#fb7185",
-    paleGold: "#fbbf24",
-    softLavender: "#a78bfa",
-    powderBlue: "#60a5fa",
-    dustyPeach: "#fb923c",
-  };
-  return map[id] ?? "#94a3b8";
 }

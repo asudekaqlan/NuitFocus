@@ -2,7 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { SEED_PANELS, STORAGE_KEY } from "@/lib/constants";
+import { NEW_PANEL_THEME_ID, SEED_PANELS, STORAGE_KEY } from "@/lib/constants";
 import type { ModalIconKey } from "@/lib/constants";
 import { normalizePanels } from "@/lib/normalize-panels";
 import type { Panel } from "@/lib/types";
@@ -103,14 +103,14 @@ export function Dashboard() {
   }, []);
 
   const addPanel = useCallback(
-    (payload: { title: string; color: string; icon: ModalIconKey }) => {
+    (payload: { title: string; icon: ModalIconKey }) => {
       const newPanel: Panel = {
         id:
           typeof crypto !== "undefined" && crypto.randomUUID
             ? crypto.randomUUID()
             : `panel-${Date.now()}`,
         title: payload.title,
-        color: payload.color,
+        color: NEW_PANEL_THEME_ID,
         icon: payload.icon,
         tasks: [],
       };
